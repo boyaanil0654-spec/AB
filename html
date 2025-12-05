@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Wheel | Futuristic Spin Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00f3ff;
+            --secondary-color: #ff00ff;
+            --accent-color: #00ff9d;
+            --bg-color: #0a0e17;
+            --card-bg: rgba(20, 25, 40, 0.7);
+            --text-color: #ffffff;
+            --shadow-glow: 0 0 15px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        #bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, var(--primary-color), transparent);
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        .light-trail {
+            position: absolute;
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, var(--secondary-color), transparent);
+            opacity: 0.5;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a9d0;
+            margin-bottom: 20px;
+        }
+
+        /* Theme Selector */
+        .theme-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .theme-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s, border-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-option:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-option.active {
+            border-color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px white;
+        }
+
+        .theme-neon-blue { background: linear-gradient(135deg, #00f3ff, #0066ff); }
+        .theme-cyber-pink { background: linear-gradient(135deg, #ff00ff, #ff0066); }
+        .theme-aurora-green { background: linear-gradient(135deg, #00ff9d, #00cc6a); }
+        .theme-tech-orange { background: linear-gradient(135deg, #ff9900, #ff3300); }
+        .theme-dual-tone { background: linear-gradient(135deg, #9d00ff, #00ffea); }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            flex: 1;
+        }
+
+        @media (min-width: 992px) {
+            .main-content {
+                flex-direction: row;
+            }
+        }
+
+        /* Wheel Container */
+        .wheel-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 40px;
+        }
+
+        @media (min-width: 768px) {
+            .wheel-container {
+                width: 400px;
+                height: 400px;
+            }
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 0 50px rgba(0, 243, 255, 0.3),
+                inset 0 0 30px rgba(0, 0, 0, 0.8);
+            transition: transform 5s cubic-bezier(0.17, 0.67, 0.21, 0.99);
+            z-index: 2;
+        }
+
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .segment-text {
+            position: absolute;
+            left: 60%;
+            top: 20%;
+            transform: rotate(45deg);
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            z-index: 3;
+            white-space: nowrap;
+        }
+
+        .wheel-center {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #222, #000);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 
+                0 0 20px rgba(0, 0, 0, 0.8),
+                inset 0 0 10px rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--primary-color);
+        }
+
+        .spin-pointer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 40px;
+            z-index: 5;
+        }
+
+        .pointer-triangle {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid var(--secondary-color);
+            filter: drop-shadow(0 0 8px var(--secondary-color));
+        }
+
+        .spin-button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 15px 40px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s;
+            box-shadow: 
+                0 5px 20px rgba(0, 243, 255, 0.4),
+                0 0 20px rgba(0, 243, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .spin-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 10px 25px rgba(0, 243, 255, 0.6),
+                0 0 30px rgba(0, 243, 255, 0.3);
+        }
+
+        .spin-button:active {
+            transform: translateY(0);
+        }
+
+        .spin-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+            z-index: -1;
+        }
+
+        .spin-button:hover::before {
+            left: 100%;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 100%;
+        }
+
+        @media (min-width: 992px) {
+            .control-panel {
+                max-width: 400px;
+            }
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-title i {
+            font-size: 1.3rem;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #a0a9d0;
+        }
+
+        .segments-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .segment-count {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .btn-control {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0, 243, 255, 0.2);
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-control:hover {
+            background: rgba(0, 243, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        .segments-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+            padding-right: 10px;
+        }
+
+        .segment-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+            transition: all 0.2s;
+        }
+
+        .segment-item:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .segment-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .segment-input {
+            flex: 1;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 8px;
+            color: white;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .segment-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn-delete {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff5555;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: rgba(255, 0, 0, 0.4);
+        }
+
+        .color-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .color-option:hover {
+            transform: scale(1.2);
+        }
+
+        .color-option.active {
+            border-color: white;
+            transform: scale(1.2);
+        }
+
+        /* Results Panel */
+        .results-panel {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .result-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+            text-align: center;
+        }
+
+        .result-display {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+
+        .result-label {
+            color: #a0a9d0;
+            font-size: 1rem;
+        }
+
+        .history-list {
+            max-height: 150px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        .history-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Mobile Navigation */
+        .mobile-nav {
+            display: flex;
+            justify-content: space-around;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            color: #a0a9d0;
+            transition: all 0.3s;
+            padding: 10px;
+            border-radius: 10px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--primary-color);
+            background: rgba(0, 243, 255, 0.1);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .nav-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Celebration Effects */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color);
+            top: -10px;
+            z-index: 1000;
+        }
+
+        .burst {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--secondary-color), transparent);
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        /* Sound Toggle */
+        .sound-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            transition: all 0.3s;
+        }
+
+        .sound-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(0, 243, 255, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .wheel-container {
+                width: 280px;
+                height: 280px;
+            }
+            
+            .spin-button {
+                font-size: 1.2rem;
+                padding: 12px 30px;
+            }
+            
+            .control-panel, .results-panel {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div id="bg-animation"></div>
+    
+    <!-- Celebration Elements -->
+    <div id="confetti-container"></div>
+    <div id="burst-container"></div>
+    
+    <!-- Sound Toggle -->
+    <div class="sound-toggle" id="soundToggle">
+        <i class="fas fa-volume-up"></i>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">NEON WHEEL</h1>
+            <p class="subtitle">Futuristic Spin & Win Experience</p>
+            
+            <!-- Theme Selector -->
+            <div class="theme-selector">
+                <div class="theme-option theme-neon-blue active" data-theme="neon-blue"></div>
+                <div class="theme-option theme-cyber-pink" data-theme="cyber-pink"></div>
+                <div class="theme-option theme-aurora-green" data-theme="aurora-green"></div>
+                <div class="theme-option theme-tech-orange" data-theme="tech-orange"></div>
+                <div class="theme-option theme-dual-tone" data-theme="dual-tone"></div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Wheel Section -->
+            <section class="wheel-section">
+                <div class="wheel-container">
+                    <div class="spin-pointer">
+                        <div class="pointer-triangle"></div>
+                    </div>
+                    <div class="wheel" id="wheel">
+                        <!-- Wheel segments will be generated here -->
+                        <div class="wheel-center">
+                            <i class="fas fa-bolt" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="spin-button" id="spinButton">
+                    <i class="fas fa-play"></i> SPIN THE WHEEL
+                </button>
+            </section>
+            
+            <!-- Control Panel -->
+            <section class="control-panel">
+                <h2 class="panel-title"><i class="fas fa-sliders-h"></i> CUSTOMIZE WHEEL</h2>
+                
+                <!-- Segments Control -->
+                <div class="control-group">
+                    <label class="control-label">NUMBER OF SEGMENTS</label>
+                    <div class="segments-control">
+                        <button class="btn-control" id="decreaseSegments">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="segment-count" id="segmentCount">6</span>
+                        <button class="btn-control" id="increaseSegments">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="segments-list" id="segmentsList">
+                        <!-- Segment items will be generated here -->
+                    </div>
+                    
+                    <button class="btn-control" id="addSegment" style="width: 100%; margin-top: 10px; border-radius: 10px;">
+                        <i class="fas fa-plus"></i> ADD SEGMENT
+                    </button>
+                </div>
+                
+                <!-- Color Picker -->
+                <div class="control-group">
+                    <label class="control-label">SEGMENT COLORS</label>
+                    <div class="color-picker" id="colorPicker">
+                        <!-- Color options will be generated here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Results Panel -->
+        <section class="results-panel">
+            <h2 class="result-title">SPIN RESULTS</h2>
+            
+            <div class="result-display">
+                <div class="result-value" id="currentResult">-</div>
+                <div class="result-label">LAST SPIN RESULT</div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">RECENT HISTORY</label>
+                <div class="history-list" id="historyList">
+                    <!-- History items will be generated here -->
+                </div>
+            </div>
+        </section>
+        
+        <!-- Mobile Navigation -->
+        <nav class="mobile-nav">
+            <div class="nav-item active">
+                <i class="fas fa-gamepad nav-icon"></i>
+                <span class="nav-text">SPIN</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-palette nav-icon"></i>
+                <span class="nav-text">DESIGN</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-history nav-icon"></i>
+                <span class="nav-text">HISTORY</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-share-alt nav-icon"></i>
+                <span class="nav-text">SHARE</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-cog nav-icon"></i>
+                <span class="nav-text">SETTINGS</span>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // Global variables
+        let segments = 6;
+        let segmentData = [];
+        let isSpinning = false;
+        let spinAngle = 0;
+        let currentColorIndex = 0;
+        let soundEnabled = true;
+        let spinHistory = [];
+        const colorPalettes = {
+            'neon-blue': ['#00f3ff', '#0066ff', '#0099ff', '#00ccff', '#33ccff', '#66ccff'],
+            'cyber-pink': ['#ff00ff', '#ff0066', '#ff3399', '#ff66cc', '#ff99ff', '#ff66ff'],
+            'aurora-green': ['#00ff9d', '#00cc6a', '#33ff99', '#66ffb3', '#99ffcc', '#ccffee'],
+            'tech-orange': ['#ff9900', '#ff3300', '#ff6600', '#ff9933', '#ffcc66', '#ffcc99'],
+            'dual-tone': ['#9d00ff', '#00ffea', '#cc00ff', '#00ffaa', '#ff00cc', '#00ff80']
+        };
+        let currentTheme = 'neon-blue';
+        
+        // Sound effects
+        const sounds = {
+            spin: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1076.mp3'),
+            click: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3'),
+            win: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3'),
+            beep: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-retro-game-emergency-alarm-1000.mp3')
+        };
+        
+        // Initialize the app
+        function init() {
+            createAnimatedBackground();
+            initializeSegments();
+            initializeColorPicker();
+            setupEventListeners();
+            updateWheel();
+            updateResults();
+            
+            // Set initial theme
+            changeTheme('neon-blue');
+        }
+        
+        // Create animated background with particles and light trails
+        function createAnimatedBackground() {
+            const container = document.getElementById('bg-animation');
+            
+            // Create particles
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                const size = Math.random() * 60 + 10;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                particle.style.left = `${x}%`;
+                particle.style.top = `${y}%`;
+                
+                // Animate particle
+                animateParticle(particle);
+                container.appendChild(particle);
+            }
+            
+            // Create light trails
+            for (let i = 0; i < 5; i++) {
+                const trail = document.createElement('div');
+                trail.classList.add('light-trail');
+                
+                const x = Math.random() * 100;
+                trail.style.left = `${x}%`;
+                
+                // Random rotation
+                const rotation = Math.random() * 360;
+                trail.style.transform = `rotate(${rotation}deg)`;
+                
+                // Animate trail
+                animateLightTrail(trail);
+                container.appendChild(trail);
+            }
+        }
+        
+        // Animate a particle
+        function animateParticle(particle) {
+            let x = parseFloat(particle.style.left);
+            let y = parseFloat(particle.style.top);
+            let xSpeed = (Math.random() - 0.5) * 0.05;
+            let ySpeed = (Math.random() - 0.5) * 0.05;
+            
+            function moveParticle() {
+                x += xSpeed;
+                y += ySpeed;
+                
+                // Wrap around edges
+                if (x > 100) x = 0;
+                if (x < 0) x = 100;
+                if (y > 100) y = 0;
+                if (y < 0) y = 100;
+                
+                particle.style.left = `${x}%`;
+                particle.style.top = `${y}%`;
+                
+                requestAnimationFrame(moveParticle);
+            }
+            
+            moveParticle();
+        }
+        
+        // Animate a light trail
+        function animateLightTrail(trail) {
+            let rotation = parseFloat(trail.style.transform.replace('rotate(', '').replace('deg)', '')) || 0;
+            
+            function rotateTrail() {
+                rotation += 0.1;
+                trail.style.transform = `rotate(${rotation}deg)`;
+                requestAnimationFrame(rotateTrail);
+            }
+            
+            rotateTrail();
+        }
+        
+        // Initialize segments with default data
+        function initializeSegments() {
+            segmentData = [];
+            const colors = colorPalettes[currentTheme];
+            
+            for (let i = 0; i < segments; i++) {
+                segmentData.push({
+                    id: i,
+                    text: `Option ${i + 1}`,
+                    color: colors[i % colors.length]
+                });
+            }
+            
+            updateSegmentsList();
+        }
+        
+        // Update the segments list in the control panel
+        function updateSegmentsList() {
+            const segmentsList = document.getElementById('segmentsList');
+            segmentsList.innerHTML = '';
+            
+            segmentData.forEach((segment, index) => {
+                const segmentItem = document.createElement('div');
+                segmentItem.className = 'segment-item';
+                segmentItem.innerHTML = `
+                    <div class="segment-color" style="background-color: ${segment.color};" data-index="${index}"></div>
+                    <input type="text" class="segment-input" value="${segment.text}" data-index="${index}" placeholder="Segment name">
+                    <button class="btn-delete" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                segmentsList.appendChild(segmentItem);
+            });
+            
+            // Add event listeners to the new elements
+            document.querySelectorAll('.segment-color').forEach(color => {
+                color.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    openColorPicker(index);
+                });
+            });
+            
+            document.querySelectorAll('.segment-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    segmentData[index].text = this.value;
+                    updateWheel();
+                });
+            });
+            
+            document.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    removeSegment(index);
+                });
+            });
+            
+            // Update segment count display
+            document.getElementById('segmentCount').textContent = segments;
+        }
+        
+        // Initialize color picker
+        function initializeColorPicker() {
+            const colorPicker = document.getElementById('colorPicker');
+            colorPicker.innerHTML = '';
+            
+            const colors = colorPalettes[currentTheme];
+            colors.forEach((color, index) => {
+                const colorOption = document.createElement('div');
+                colorOption.className = `color-option ${index === currentColorIndex ? 'active' : ''}`;
+                colorOption.style.backgroundColor = color;
+                colorOption.dataset.color = color;
+                colorOption.dataset.index = index;
+                colorPicker.appendChild(colorOption);
+            });
+            
+            // Add event listeners to color options
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    currentColorIndex = parseInt(this.dataset.index);
+                    document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+        
+        // Open color picker for a specific segment
+        function openColorPicker(segmentIndex) {
+            const colors = colorPalettes[currentTheme];
+            segmentData[segmentIndex].color = colors[currentColorIndex];
+            updateWheel();
+            updateSegmentsList();
+        }
+        
+        // Add a new segment
+        function addSegment() {
+            if (segments >= 12) return; // Limit to 12 segments
+            
+            segments++;
+            const colors = colorPalettes[currentTheme];
+            segmentData.push({
+                id: segments - 1,
+                text: `Option ${segments}`,
+                color: colors[(segments - 1) % colors.length]
+            });
+            
+            updateSegmentsList();
+            updateWheel();
+        }
+        
+        // Remove a segment
+        function removeSegment(index) {
+            if (segments <= 3) return; // Minimum 3 segments
+            
+            segments--;
+            segmentData.splice(index, 1);
+            
+            // Reassign IDs
+            segmentData.forEach((segment, i) => {
+                segment.id = i;
+            });
+            
+            updateSegmentsList();
+            updateWheel();
+        }
+        
+        // Update the wheel visualization
+        function updateWheel() {
+            const wheel = document.getElementById('wheel');
+            wheel.innerHTML = '';
+            
+            const angle = 360 / segments;
+            
+            // Create segments
+            segmentData.forEach((segment, index) => {
+                const segmentEl = document.createElement('div');
+                segmentEl.className = 'wheel-segment';
+                segmentEl.style.backgroundColor = segment.color;
+                segmentEl.style.transform = `rotate(${index * angle}deg)`;
+                
+                const textEl = document.createElement('div');
+                textEl.className = 'segment-text';
+                textEl.textContent = segment.text;
+                textEl.style.transform = `rotate(${angle/2}deg)`;
+                
+                segmentEl.appendChild(textEl);
+                wheel.appendChild(segmentEl);
+            });
+            
+            // Add center
+            const center = document.createElement('div');
+            center.className = 'wheel-center';
+            center.innerHTML = '<i class="fas fa-bolt"></i>';
+            wheel.appendChild(center);
+        }
+        
+        // Spin the wheel
+        function spinWheel() {
+            if (isSpinning) return;
+            
+            // Play spin sound
+            if (soundEnabled) {
+                sounds.spin.currentTime = 0;
+                sounds.spin.play();
+            }
+            
+            isSpinning = true;
+            const wheel = document.getElementById('wheel');
+            const spinButton = document.getElementById('spinButton');
+            spinButton.disabled = true;
+            spinButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SPINNING...';
+            
+            // Calculate random spin
+            const extraSpins = 5; // Minimum number of full rotations
+            const segmentAngle = 360 / segments;
+            const randomSegment = Math.floor(Math.random() * segments);
+            const stopAngle = 3600 + (randomSegment * segmentAngle); // 10 full rotations + segment offset
+            
+            // Apply spin animation
+            wheel.style.transition = 'transform 5s cubic-bezier(0.17, 0.67, 0.21, 0.99)';
+            wheel.style.transform = `rotate(${stopAngle}deg)`;
+            
+            // Add visual effects during spin
+            createSpinEffects();
+            
+            // After spin completes
+            setTimeout(() => {
+                // Get winning segment
+                const winningSegment = segmentData[randomSegment];
+                
+                // Update results
+                spinHistory.unshift({
+                    segment: winningSegment.text,
+                    color: winningSegment.color,
+                    time: new Date().toLocaleTimeString()
+                });
+                
+                // Keep only last 5 results
+                if (spinHistory.length > 5) spinHistory.pop();
+                
+                updateResults();
+                
+                // Celebration effects
+                createCelebrationEffects();
+                
+                // Play win sound
+                if (soundEnabled) {
+                    sounds.win.currentTime = 0;
+                    sounds.win.play();
+                }
+                
+                // Haptic feedback on mobile
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+                
+                // Reset button
+                isSpinning = false;
+                spinButton.disabled = false;
+                spinButton.innerHTML = '<i class="fas fa-play"></i> SPIN THE WHEEL';
+                
+                // Update wheel for next spin
+                spinAngle = stopAngle % 360;
+                wheel.style.transition = 'none';
+                wheel.style.transform = `rotate(${spinAngle}deg)`;
+                
+                // Force reflow to reset transition
+                void wheel.offsetWidth;
+                
+            }, 5000);
+        }
+        
+        // Create visual effects during spin
+        function createSpinEffects() {
+            const wheel = document.getElementById('wheel');
+            
+            // Add glow effect
+            wheel.style.boxShadow = '0 0 80px rgba(0, 243, 255, 0.7)';
+            
+            // Create particle burst from center
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const burst = document.createElement('div');
+                    burst.className = 'burst';
+                    burst.style.left = '50%';
+                    burst.style.top = '50%';
+                    burst.style.transform = 'translate(-50%, -50%)';
+                    
+                    // Random direction
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.random() * 150 + 50;
+                    
+                    // Animate burst
+                    const startTime = Date.now();
+                    function animateBurst() {
+                        const elapsed = Date.now() - startTime;
+                        const progress = Math.min(elapsed / 1000, 1);
+                        
+                        const x = Math.cos(angle) * distance * progress;
+                        const y = Math.sin(angle) * distance * progress;
+                        const scale = 1 - progress;
+                        const opacity = 1 - progress;
+                        
+                        burst.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${scale})`;
+                        burst.style.opacity = opacity;
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animateBurst);
+                        } else {
+                            burst.remove();
+                        }
+                    }
+                    
+                    document.getElementById('burst-container').appendChild(burst);
+                    animateBurst();
+                    
+                }, i * 100);
+            }
+            
+            // Remove glow after spin
+            setTimeout(() => {
+                wheel.style.boxShadow = '';
+            }, 5000);
+        }
+        
+        // Create celebration effects
+        function createCelebrationEffects() {
+            const confettiContainer = document.getElementById('confetti-container');
+            
+            // Create confetti
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // Random color from current theme
+                const colors = colorPalettes[currentTheme];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.backgroundColor = color;
+                
+                // Random position
+                const left = Math.random() * 100;
+                confetti.style.left = `${left}%`;
+                
+                // Random size
+                const size = Math.random() * 10 + 5;
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+                
+                // Random shape
+                if (Math.random() > 0.5) {
+                    confetti.style.borderRadius = '50%';
+                }
+                
+                confettiContainer.appendChild(confetti);
+                
+                // Animate confetti falling
+                const duration = Math.random() * 3 + 2;
+                const endTop = 100 + Math.random() * 20;
+                
+                confetti.animate([
+                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                    { transform: `translateY(${endTop}vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                ], {
+                    duration: duration * 1000,
+                    easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
+                });
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    confetti.remove();
+                }, duration * 1000);
+            }
+            
+            // Create burst effect
+            const burst = document.createElement('div');
+            burst.className = 'burst';
+            burst.style.left = '50%';
+            burst.style.top = '50%';
+            burst.style.width = '200px';
+            burst.style.height = '200px';
+            burst.style.opacity = '0';
+            
+            document.getElementById('burst-container').appendChild(burst);
+            
+            // Animate burst
+            burst.animate([
+                { transform: 'translate(-50%, -50%) scale(0)', opacity: 0.8 },
+                { transform: 'translate(-50%, -50%) scale(1.5)', opacity: 0 }
+            ], {
+                duration: 800,
+                easing: 'ease-out'
+            });
+            
+            // Remove burst after animation
+            setTimeout(() => {
+                burst.remove();
+            }, 800);
+        }
+        
+        // Update results display
+        function updateResults() {
+            const currentResult = document.getElementById('currentResult');
+            const historyList = document.getElementById('historyList');
+            
+            // Update current result
+            if (spinHistory.length > 0) {
+                currentResult.textContent = spinHistory[0].segment;
+                currentResult.style.color = spinHistory[0].color;
+            } else {
+                currentResult.textContent = '-';
+                currentResult.style.color = 'var(--accent-color)';
+            }
+            
+            // Update history list
+            historyList.innerHTML = '';
+            spinHistory.forEach((result, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <span>${result.segment}</span>
+                    <span style="color: ${result.color}">${result.time}</span>
+                `;
+                historyList.appendChild(historyItem);
+            });
+        }
+        
+        // Change theme
+        function changeTheme(theme) {
+            currentTheme = theme;
+            const root = document.documentElement;
+            
+            switch(theme) {
+                case 'neon-blue':
+                    root.style.setProperty('--primary-color', '#00f3ff');
+                    root.style.setProperty('--secondary-color', '#ff00ff');
+                    root.style.setProperty('--accent-color', '#00ff9d');
+                    break;
+                case 'cyber-pink':
+                    root.style.setProperty('--primary-color', '#ff00ff');
+                    root.style.setProperty('--secondary-color', '#ff0066');
+                    root.style.setProperty('--accent-color', '#00ff9d');
+                    break;
+                case 'aurora-green':
+                    root.style.setProperty('--primary-color', '#00ff9d');
+                    root.style.setProperty('--secondary-color', '#00cc6a');
+                    root.style.setProperty('--accent-color', '#00f3ff');
+                    break;
+                case 'tech-orange':
+                    root.style.setProperty('--primary-color', '#ff9900');
+                    root.style.setProperty('--secondary-color', '#ff3300');
+                    root.style.setProperty('--accent-color', '#00ff9d');
+                    break;
+                case 'dual-tone':
+                    root.style.setProperty('--primary-color', '#9d00ff');
+                    root.style.setProperty('--secondary-color', '#00ffea');
+                    root.style.setProperty('--accent-color', '#ff00cc');
+                    break;
+            }
+            
+            // Update color picker and segments
+            initializeColorPicker();
+            segmentData.forEach((segment, index) => {
+                const colors = colorPalettes[theme];
+                segment.color = colors[index % colors.length];
+            });
+            
+            updateSegmentsList();
+            updateWheel();
+            
+            // Update active theme button
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.dataset.theme === theme) {
+                    option.classList.add('active');
+                }
+            });
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Spin button
+            document.getElementById('spinButton').addEventListener('click', spinWheel);
+            
+            // Segment controls
+            document.getElementById('increaseSegments').addEventListener('click', () => {
+                if (segments < 12) {
+                    segments++;
+                    addSegment();
+                }
+            });
+            
+            document.getElementById('decreaseSegments').addEventListener('click', () => {
+                if (segments > 3) {
+                    removeSegment(segments - 1);
+                }
+            });
+            
+            document.getElementById('addSegment').addEventListener('click', addSegment);
+            
+            // Theme selector
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    changeTheme(this.dataset.theme);
+                });
+            });
+            
+            // Sound toggle
+            document.getElementById('soundToggle').addEventListener('click', function() {
+                soundEnabled = !soundEnabled;
+                const icon = this.querySelector('i');
+                if (soundEnabled) {
+                    icon.className = 'fas fa-volume-up';
+                    this.style.color = 'var(--primary-color)';
+                } else {
+                    icon.className = 'fas fa-volume-mute';
+                    this.style.color = '#a0a9d0';
+                }
+                
+                // Play click sound
+                if (soundEnabled) {
+                    sounds.click.currentTime = 0;
+                    sounds.click.play();
+                }
+            });
+            
+            // Mobile navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Play click sound
+                    if (soundEnabled) {
+                        sounds.beep.currentTime = 0;
+                        sounds.beep.play();
+                    }
+                });
+            });
+            
+            // Magnetic button effect
+            document.querySelectorAll('.spin-button, .btn-control').forEach(button => {
+                button.addEventListener('mousemove', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const deltaX = (x - centerX) / centerX * 5;
+                    const deltaY = (y - centerY) / centerY * 5;
+                    
+                    this.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translate(0, 0)';
+                });
+            });
+        }
+        
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
